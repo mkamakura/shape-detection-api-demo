@@ -41,8 +41,8 @@
     function drawRect(ctx, x, y, width, height) {
       ctx.strokeStyle = lineColors[(count++) % lineColors.length] 
       ctx.beginPath()
-			ctx.rect(x, y, width, height)
-			ctx.stroke()
+      ctx.rect(x, y, width, height)
+      ctx.stroke()
     }
 
     function faceDetector(files) {
@@ -64,6 +64,7 @@
             const faceDetector = new FaceDetector()
             const faces = await faceDetector.detect(canvas)
             faces.forEach((face, index) => {
+              console.log(face)
               const { boundingBox: { x, y, width, height } } = face
               drawRect(ctx, x, y, width, height)
             })
