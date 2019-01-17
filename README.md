@@ -1,6 +1,6 @@
 # shape-detection-api-demo
 
-## Requires
+## Requirements
 - Chrome
 - Enable the below flog
   - chrome://flags/#enable-experimental-web-platform-features
