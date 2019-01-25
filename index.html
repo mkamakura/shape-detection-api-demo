@@ -3,21 +3,39 @@
   <head>
     <meta charset="UTF-8">
     <title>shape-detection-api demo</title>
+    <style>
+      label {
+        border: 1px solid black;
+        padding: 3px;
+        margin-right: 5px;
+        cursor: pointer;
+      }
+
+      label:hover {
+        background: #ccc;
+      }
+    </style>
   </head>
 
   <body>
     <h1>shape-detection-api-demo</h1>
     <div id="errorMessage" style="color: red"></div>
-    <label>
-      File Upload/FaceDetector
-      <input id="file" type="file" accept="image/*" onchange="faceDetector(this.files)" style="display:none;"/>
-    </label>
-
-    <label>
-      File Upload/BarcodeDetector
-      <input id="file" type="file" accept="image/*" onchange="barcodeDetector(this.files)" style="display:none;"/>
-    </label>
-
+    <div>
+      <label>
+        File Upload/FaceDetector
+        <input id="file" type="file" accept="image/*" onchange="faceDetector(this.files)" style="display:none;"/>
+      </label>
+  
+      <label>
+        File Upload/BarcodeDetector
+        <input id="file" type="file" accept="image/*" onchange="barcodeDetector(this.files)" style="display:none;"/>
+      </label>
+  
+      <label>
+        File Upload/TextDetector
+        <input id="file" type="file" accept="image/*" onchange="textDetector(this.files)" style="display:none;"/>
+      </label>
+    </div>
     <canvas id="canvas"></canvas>
     <div id="result"></div>
   </body>
@@ -55,6 +73,37 @@
       ctx.stroke()
     }
 
+    function textDetector(files) {
+      const file = files[0]
+      if (!file.type.match(/image.*/)) {
+        errorMessageElement.innerText = `Only image files are accepted.`
+        return
+      }
+
+      try {
+        const reader = new FileReader()
+        reader.onload = async () => {
+          const img = new Image()
+          img.src = reader.result
+          img.onload = async () => {
+            ctx = resetCanvas(img)
+            const textDetector = new TextDetector()
+            const texts = await textDetector.detect(canvas)
+            texts.forEach((text) => {
+              const { boundingBox: { x, y, width, height } } = text
+              drawRect(ctx, x, y, width, height)
+              console.log(text)
+              document.getElementById('result').innerText = text.rawValue
+            })
+          }
+        }
+        reader.readAsDataURL(file)
+      } catch (e) {
+        console.error('Text detection failed:', e)
+      }
+    }
+
+
     function barcodeDetector(files) {
       const file = files[0]
       if (!file.type.match(/image.*/)) {
@@ -69,7 +118,7 @@
           img.src = reader.result
           img.onload = async () => {
             ctx = resetCanvas(img)
-            const barcodeDetector = new BarcodeDetector({ format: 'qr_code' })
+            const barcodeDetector = new BarcodeDetector()
             const barcodes = await barcodeDetector.detect(canvas)
             barcodes.forEach((barcode) => {
               console.log(barcode)
